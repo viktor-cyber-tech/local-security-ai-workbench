@@ -16,8 +16,14 @@ if (-not (Test-Path -LiteralPath $modelfile -PathType Leaf)) {
     throw "Modelfile not found: $modelfile"
 }
 
-Write-Host 'Downloading the Qwen2.5-Coder 14B base model (skips the download if already present)...'
-& ollama pull qwen2.5-coder:14b
+$fromLine = Select-String -LiteralPath $modelfile -Pattern '^\s*FROM\s+(\S+)' | Select-Object -First 1
+$baseModel = if ($fromLine) { $fromLine.Matches[0].Groups[1].Value } else { $null }
+if (-not $baseModel) {
+    throw "No FROM line found in $modelfile"
+}
+
+Write-Host "Downloading base model $baseModel (skips the download if already present)..."
+& ollama pull $baseModel
 if ($LASTEXITCODE -ne 0) {
     throw "ollama pull failed with exit code $LASTEXITCODE."
 }

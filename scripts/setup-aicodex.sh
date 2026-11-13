@@ -59,8 +59,14 @@ if ! ollama list >/dev/null 2>&1; then
   exit 1
 fi
 
-printf '%s\n' 'Downloading the Qwen2.5-Coder 14B base model (skips the download if already present)...'
-ollama pull qwen2.5-coder:14b
+base_model="$(awk '{sub(/\r$/, "")} toupper($1)=="FROM"{print $2; exit}' "$modelfile")"
+if [[ -z "$base_model" ]]; then
+  printf 'No FROM line found in %s\n' "$modelfile" >&2
+  exit 1
+fi
+
+printf 'Downloading base model %s (skips the download if already present)...\n' "$base_model"
+ollama pull "$base_model"
 
 printf "Building local model '%s' from the repository Modelfile...\n" "$model_name"
 ollama create "$model_name" -f "$modelfile"

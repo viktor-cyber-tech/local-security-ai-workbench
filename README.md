@@ -1,6 +1,6 @@
 # AICodex — Local CTF & Cybersecurity Assistant
 
-A practical Ollama setup for a local, offline-first cybersecurity assistant built around **Qwen2.5-Coder 14B**.
+A practical Ollama setup for a local, offline-first cybersecurity assistant built around **Qwen3-Coder 30B-A3B**.
 
 It is designed for authorized CTFs, homelabs, defensive security work, PowerShell/Bash command generation, log analysis, and learning workflows. It is not an autonomous exploitation tool: have it produce a command, run it in your own lab or CTF environment, then verify the result.
 
@@ -50,7 +50,7 @@ ollama run aicodex
 If Ollama is already installed and you prefer to see each step, run these commands from the cloned repository folder:
 
 ```bash
-ollama pull qwen2.5-coder:14b
+ollama pull qwen3-coder:30b
 ollama create aicodex -f ./Modelfile
 ollama run aicodex
 ```
@@ -63,18 +63,21 @@ New to local AI or introducing AICodex to a classmate? See [example prompts](doc
 
 **Best rule for flags and transformations:** ask AICodex for a command that calculates and prints the answer, run it in your own terminal, then paste the real output back. Do not trust a model to mentally guess a multi-step final flag.
 
-## Why use a heavier 14B model on modest hardware?
+## Model choice
 
 The ThinkPad used for this project has an Intel Core 7 240H, 32 GB DDR5 memory, and Intel integrated graphics. That means local inference is constrained mostly by CPU and shared memory—not dedicated GPU VRAM.
 
-We still chose `qwen2.5-coder:14b` because the smaller models were fast but unreliable in the exact workflows that matter for CTF learning:
+The project started on `qwen2.5-coder:14b` because the smaller models were fast but unreliable in the exact workflows that matter for CTF learning:
 
 | Model | Download size | Observed role | Decision |
 | --- | ---: | --- | --- |
 | [`qwen3:1.7b`](https://ollama.com/library/qwen3) | ~1.4 GB | Quick chat and lightweight help | Too weak for dependable multi-step CTF work |
 | [`qwen3:4b`](https://ollama.com/library/qwen3) | ~2.5 GB | Better general assistant | Can become slow or verbose when reasoning |
 | [`qwen2.5-coder:3b`](https://ollama.com/library/qwen2.5-coder) | ~1.9 GB | Fast code snippets | Missed simple decode/format tasks |
-| [`qwen2.5-coder:14b`](https://ollama.com/library/qwen2.5-coder) | ~9.0 GB | Kali/Bash and PowerShell command generation | **Chosen** |
+| [`qwen2.5-coder:14b`](https://ollama.com/library/qwen2.5-coder) | ~9.0 GB | Kali/Bash and PowerShell command generation | Original choice; dense, so slow on CPU/iGPU |
+| [`qwen3-coder:30b`](https://ollama.com/library/qwen3-coder) | ~19 GB | MoE: 30.5B total, 3.3B active per token | **Current** — stronger and faster than the dense 14B |
+
+It now uses `qwen3-coder:30b`, a mixture-of-experts model: it needs more RAM (~19 GB) but only activates ~3.3B parameters per token, so it generates faster than a dense 14B while being a newer, stronger coder. To try another base, change the `FROM` line in `Modelfile` and rerun the setup script—the scripts read the base model from it.
 
 The goal is not to make the laptop compete with a desktop GPU. The goal is to accept slower generation in exchange for substantially better command construction, instruction-following, and troubleshooting. For exact transformations, use the command it provides and verify output locally.
 
@@ -105,7 +108,7 @@ flag{final_boss_passed}
 
 ```text
 .
-├── Modelfile                 # Custom AICodex behavior on Qwen2.5-Coder 14B
+├── Modelfile                 # Custom AICodex behavior on Qwen3-Coder 30B-A3B
 ├── docs/
 │   ├── SETUP.md
 │   ├── TROUBLESHOOTING.md
@@ -122,7 +125,7 @@ flag{final_boss_passed}
 
 - A Modelfile changes behavior and response style; it does not train or upgrade the base model.
 - A local Ollama chat does not execute commands. Use a separate terminal or an approved agent workflow in a disposable CTF workspace.
-- The 14B model can still make mistakes. Treat generated commands as suggestions and validate them before use.
+- The model can still make mistakes. Treat generated commands as suggestions and validate them before use.
 
 ## License and permitted use
 

@@ -4,8 +4,8 @@
 
 - Ollama installed and available in your terminal. Get it from [ollama.com/download](https://ollama.com/download).
 - Git installed.
-- At least 12 GB free disk space for the base model and local cache.
-- 32 GB RAM is recommended for `qwen2.5-coder:14b`; 16 GB may work but can be substantially slower.
+- At least 22 GB free disk space for the base model and local cache.
+- 32 GB RAM minimum for `qwen3-coder:30b` (~19 GB download); 64 GB is comfortable.
 
 ## Performance recommendation
 
@@ -43,7 +43,7 @@ The `--install-ollama` flag uses [Ollama’s official Linux installer](https://d
 Both scripts:
 
 1. Check that Ollama is installed; the Bash script can install it when passed `--install-ollama`.
-2. Download `qwen2.5-coder:14b` if necessary.
+2. Download the base model named in the `Modelfile` `FROM` line (`qwen3-coder:30b`) if necessary.
 3. Build or rebuild the local `aicodex` model using the repository’s `Modelfile`.
 4. Start `ollama run aicodex` when passed `-Run` or `--run`.
 
@@ -58,7 +58,7 @@ ollama run aicodex
 From the cloned repository folder, these commands perform the same model download, build, and launch without using a helper script:
 
 ```bash
-ollama pull qwen2.5-coder:14b
+ollama pull qwen3-coder:30b
 ollama create aicodex -f ./Modelfile
 ollama run aicodex
 ```
