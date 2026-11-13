@@ -6,3 +6,4 @@ Thumbs.db
 ollama-models/
 *.gguf
 searxng/
+__pycache__/
