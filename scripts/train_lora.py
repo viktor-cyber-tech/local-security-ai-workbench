@@ -49,6 +49,8 @@ def main():
     ap.add_argument("--no-gguf", action="store_true", help="skip GGUF export (save the LoRA only)")
     ap.add_argument("--dtype", default="bfloat16", choices=["bfloat16", "float16"],
                     help="training precision; try float16 on Intel XPU if bf16 triggers a Triton 'llvm.fma.bf16' error")
+    ap.add_argument("--no-grad-checkpoint", action="store_true",
+                    help="disable gradient checkpointing: faster steps but more memory. Fine for small models; may OOM the 30B")
     opts = ap.parse_args()
 
     if not Path(opts.train).is_file():
@@ -82,7 +84,7 @@ def main():
         lora_dropout=0,
         bias="none",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-        use_gradient_checkpointing="unsloth",
+        use_gradient_checkpointing=False if opts.no_grad_checkpoint else "unsloth",
         random_state=3407,
     )
 
