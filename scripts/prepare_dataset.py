@@ -38,7 +38,8 @@ ROLE_MAP = {
     "gpt": "assistant", "assistant": "assistant", "bot": "assistant", "model": "assistant",
     "system": "system",
 }
-PAIR_KEYS = [("question", "answer"), ("prompt", "response"), ("prompt", "completion"),
+PAIR_KEYS = [("user", "assistant"), ("human", "gpt"),
+             ("question", "answer"), ("prompt", "response"), ("prompt", "completion"),
              ("input", "output"), ("query", "response")]
 BIG_FILE_BYTES = 512 * 1024 * 1024
 
