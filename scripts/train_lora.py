@@ -47,6 +47,8 @@ def main():
     ap.add_argument("--grad-accum", type=int, default=4)
     ap.add_argument("--quant", default="q4_k_m", help="GGUF quantization for export")
     ap.add_argument("--no-gguf", action="store_true", help="skip GGUF export (save the LoRA only)")
+    ap.add_argument("--dtype", default="bfloat16", choices=["bfloat16", "float16"],
+                    help="training precision; try float16 on Intel XPU if bf16 triggers a Triton 'llvm.fma.bf16' error")
     opts = ap.parse_args()
 
     if not Path(opts.train).is_file():
@@ -64,11 +66,14 @@ def main():
     from datasets import load_dataset
     from trl import SFTConfig, SFTTrainer
 
+    import torch
     use_4bit = not opts.no_4bit
+    want_f16 = opts.dtype == "float16"
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=opts.model,
         max_seq_length=opts.max_seq_len,
         load_in_4bit=use_4bit,
+        dtype=torch.float16 if want_f16 else None,
     )
     model = FastLanguageModel.get_peft_model(
         model,
@@ -98,6 +103,8 @@ def main():
         eval_dataset=ds.get("test"),
         args=SFTConfig(
             dataset_text_field="text",
+            fp16=want_f16,
+            bf16=not want_f16,
             per_device_train_batch_size=opts.batch,
             gradient_accumulation_steps=opts.grad_accum,
             warmup_steps=5,
