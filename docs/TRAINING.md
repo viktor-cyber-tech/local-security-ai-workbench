@@ -24,7 +24,7 @@ py -m pip install --upgrade ollama datasets trl
 py -c "import torch; print(torch.__version__, 'cuda', torch.cuda.is_available(), 'xpu', torch.xpu.is_available())"
 ```
 
-- `xpu True`: Unsloth can train on your Intel Core Ultra graphics. Good for **small models (about 4B) and short runs**.
+- `xpu True`: Unsloth can train on your Intel Core Ultra graphics with 4-bit QLoRA. Time a few steps before committing to a long run (Step 4).
 - Both `False`: you have the regular (NVIDIA-only) Unsloth build. Follow Unsloth's **Intel GPU install guide** (unsloth.ai/docs → Install → Intel). It needs a fresh Python environment, Intel oneAPI Base Toolkit and `pip install .[intel-gpu-torch290]`. Or skip local training and use a cloud NVIDIA GPU for Step 4.
 
 ### Step 1: Record a baseline
@@ -52,13 +52,21 @@ Open `data\processed\train.jsonl` and read about 20 random lines. Delete bad dat
 
 ### Step 4: Train
 
-**On this laptop** (Intel XPU, small model). Start with a short test run:
+**On this laptop** (Intel XPU, 4-bit QLoRA, which is the script's default). Time a few steps first:
 
 ```powershell
-py scripts\train_lora.py --model unsloth/Qwen3-4B-Instruct-2507 --no-4bit --max-steps 30
+# Small model: quick check that the whole pipeline works
+py scripts\train_lora.py --model unsloth/Qwen3-4B-Instruct-2507 --max-steps 10
+# The real AICodex base (30B MoE): see if it fits and how long a step takes
+py scripts\train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --max-steps 5 --no-gguf
 ```
 
-If that finishes, do the full run by dropping `--max-steps` (or use `--epochs 1`). Expect hours, not minutes. Keep it plugged in.
+Watch the seconds per step in the progress bar. A full run is about `(train rows ÷ 8) × epochs` steps at the default batch settings, so multiply it out before starting a long run. Close other apps and keep the laptop plugged in.
+
+Notes for the 30B on this laptop:
+- 4-bit QLoRA needs about 17.5 GB of GPU memory for this model. Integrated graphics can borrow roughly half your RAM, so with 64 GB it fits on paper.
+- For MoE models, Unsloth downloads the **full 16-bit model (~61 GB)** and converts it to 4-bit while loading. You need that much free disk space, and the RAM spike while loading can run out of memory. If it does, train on a cloud GPU or a smaller dense model.
+- If the timing works out to days, use `--max-steps` with a smaller `--sample` in Step 3, or train on a rented GPU.
 
 **On a rented NVIDIA GPU (24 GB+), for the real AICodex base:** copy the repo and `data\processed\` to the machine, install Unsloth, then:
 

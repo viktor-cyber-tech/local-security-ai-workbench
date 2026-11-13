@@ -5,8 +5,9 @@ Input: data/processed/train.jsonl and test.jsonl from scripts/prepare_dataset.py
 (chat records: {"messages": [{"role": ..., "content": ...}, ...]}).
 
 Examples (run from the repo root):
-  # Laptop (Intel Core Ultra iGPU via Unsloth's Intel/XPU install): small model, short run
-  python scripts/train_lora.py --model unsloth/Qwen3-4B-Instruct-2507 --no-4bit --max-steps 60
+  # Laptop (Intel Core Ultra iGPU via Unsloth's Intel/XPU install), QLoRA 4-bit: time a few steps first
+  python scripts/train_lora.py --model unsloth/Qwen3-4B-Instruct-2507 --max-steps 10
+  python scripts/train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --max-steps 5
 
   # Rented NVIDIA GPU (24 GB+): the real AICodex base
   python scripts/train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --epochs 1
@@ -37,7 +38,7 @@ def main():
     ap.add_argument("--test", default="data/processed/test.jsonl")
     ap.add_argument("--out", default="outputs/aicodex-lora")
     ap.add_argument("--max-seq-len", type=int, default=4096)
-    ap.add_argument("--no-4bit", action="store_true", help="load 16-bit weights (needed where bitsandbytes 4-bit is unsupported, e.g. Intel XPU)")
+    ap.add_argument("--no-4bit", action="store_true", help="plain LoRA on 16-bit weights instead of 4-bit QLoRA (needs ~4x the memory)")
     ap.add_argument("--rank", type=int, default=16, help="LoRA rank")
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--epochs", type=float, default=1.0)
