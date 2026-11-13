@@ -107,6 +107,52 @@ Guidelines:
 - Hold back 10% as a test set and never train on it.
 - Sources: your own NCL/CyberSEED/TryHackMe writeups (after the competition ends), plus retired public challenges where the license allows reuse.
 
+### 1b. Adding a public dataset (`Vyber07/cyber-security`)
+
+[`Vyber07/cyber-security`](https://huggingface.co/datasets/Vyber07/cyber-security) is a large Apache-2.0 cybersecurity dataset in mixed JSON layouts (ShareGPT conversations and Instruction/Input/Output records with domain metadata). Use it to add breadth, and keep your own verified examples as the core.
+
+**Before you use it:**
+- **Gated access.** Open the dataset page while signed in to Hugging Face and accept the access conditions first.
+- **It is huge.** The card lists hundreds of files and tens of GB, and the size figures on the card disagree with each other. Don't train on all of it. A few thousand well-chosen examples is plenty for a LoRA, and more mostly costs GPU time.
+- **Quality is unverified.** The card doesn't explain how the records were generated or how they're licensed from the sources it lists. Spot-check a sample before training. Wrong commands in the data teach wrong commands.
+- **It's described as "no restrictions" offensive and defensive content.** Training on it can weaken the authorization rules in the AICodex system prompt. Check the held-out test set for that as well as for accuracy.
+
+**Download only what you need** (PowerShell, from the repo folder; `data/` is git-ignored):
+
+```powershell
+py -m pip install --upgrade huggingface_hub ijson
+hf auth login                                  # older versions: huggingface-cli login
+# Look at the file list on the dataset's "Files" tab first, then download a subset:
+hf download Vyber07/cyber-security --repo-type dataset --local-dir data\raw\cyber-security --include "*.jsonl"
+```
+
+Older `huggingface_hub` versions use `huggingface-cli download` with the same arguments. Adjust `--include` to match the folders or files you picked.
+
+**Convert it to AICodex training data:**
+
+```powershell
+py scripts\prepare_dataset.py data\raw\cyber-security --sample 3000 `
+   --own data\my-writeups.jsonl --own-repeat 3
+```
+
+What the script does:
+- Normalizes ShareGPT, chat, Instruction/Input/Output and question/answer records into `{"messages": [...]}`
+- Replaces each record's system prompt with the AICodex one from the `Modelfile`
+- Drops broken JSON, unrecognized layouts, non-alternating conversations, near-empty and very long records, and duplicates
+- Randomly samples `--sample` examples without loading everything into memory (install `ijson` for very large JSON-array files)
+- Mixes in your own verified examples (`--own`), repeated `--own-repeat` times so they outweigh the public data
+- Writes `data/processed/train.jsonl` and `data/processed/test.jsonl` (10% held out), and prints counts of what it kept and skipped
+
+Use `--domain web --domain forensics` (matched against record metadata) to keep only the categories you care about. Records without metadata are dropped when you use this filter. If most records come back "unrecognized", open one file, check its keys, and add the layout to `normalize()`.
+
+**Spot-check before training:**
+
+```powershell
+Get-Content data\processed\train.jsonl -TotalCount 5
+```
+
+Upload `train.jsonl` and `test.jsonl` to the notebook and load them with `load_dataset("json", data_files={"train": "train.jsonl", "test": "test.jsonl"})`.
+
 ### 2. Train with Unsloth
 
 Follow Unsloth's official Qwen3 / Qwen3-Coder fine-tuning notebook (docs.unsloth.ai). It uses LoRA, keeps the MoE router frozen by default, and can export straight to GGUF. Typical starting settings: LoRA rank 16, 1–3 epochs, learning rate around 2e-4. Watch the validation loss and stop if it starts rising.

@@ -83,7 +83,7 @@ The goal is not to make the laptop compete with a desktop GPU. The goal is to ac
 
 ## Going further
 
-- **[Training for CTF challenges](docs/TRAINING.md):** few-shot examples in the Modelfile, a knowledge base of your own writeups (RAG), and LoRA fine-tuning with Unsloth.
+- **[Training for CTF challenges](docs/TRAINING.md):** few-shot examples in the Modelfile, a knowledge base of your own writeups (RAG), and LoRA fine-tuning with Unsloth (including the `Vyber07/cyber-security` dataset via `scripts/prepare_dataset.py`).
 - **[Internet access](docs/INTERNET_ACCESS.md):** a terminal agent with Ollama web search (`scripts/aicodex_web.py`), or Open WebUI with self-hosted SearXNG.
 
 ## Safe, effective workflow
@@ -124,6 +124,7 @@ flag{final_boss_passed}
 │   ├── setup-aicodex.ps1     # Builds AICodex on Windows PowerShell
 │   ├── setup-aicodex.sh      # Builds AICodex on Kali/Debian/WSL
 │   ├── aicodex_web.py        # AICodex + Ollama web_search/web_fetch
+│   ├── prepare_dataset.py    # Builds fine-tuning JSONL from local datasets
 │   ├── decode_layers.sh
 │   └── decode_layers.ps1
 └── assets/                   # Terminal-style screenshots for the README

@@ -7,3 +7,4 @@ ollama-models/
 *.gguf
 searxng/
 __pycache__/
+data/
