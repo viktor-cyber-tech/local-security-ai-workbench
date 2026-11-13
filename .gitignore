@@ -9,3 +9,4 @@ searxng/
 __pycache__/
 data/
 outputs/
+.venv*/
