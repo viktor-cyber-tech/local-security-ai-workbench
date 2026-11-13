@@ -16,6 +16,18 @@ For most CTF work, **Levels 1 and 2 give the biggest gains**. Fine-tuning rarely
 
 Run everything in PowerShell from the repo folder (`cd ~\local-security-ai-workbench`). The scripts write to `data/` and `outputs/`, which are git-ignored.
 
+> ### Intel Core Ultra (iGPU) — measured working recipe
+>
+> Training on an Intel integrated GPU under Windows works, but has three gotchas we hit and solved on a Core Ultra 7 255U (measured Nov 2026):
+>
+> 1. **Run training in Command Prompt (`cmd`), not PowerShell** — the env setup uses `call` / `set VAR=val` syntax. Activate the venv with `.venv-unsloth\Scripts\activate.bat` and confirm the prompt shows `(.venv-unsloth)`.
+> 2. **Load only the MSVC compiler, not full oneAPI.** Triton needs a C compiler, so `call "...\VC\Auxiliary\Build\vcvars64.bat"` + `set CC=cl` + `set ZE_PATH=C:\Tools\level-zero-win-sdk-1.20.2`. Do **not** run oneAPI's `setvars.bat` — it overrides PyTorch's bundled Intel runtime and breaks XPU.
+> 3. **Use `--dtype float16`.** bf16 fails with `InvalidFunctionCall: llvm.fma.bf16` in Intel's Triton SPIR-V translator.
+>
+> Always `ollama stop workbench` first to free shared GPU memory, and keep **4-bit QLoRA** (the default) — a full fp16 load won't fit alongside Ollama.
+>
+> **Fast settings:** `--dtype float16 --max-seq-len 1024 --no-grad-checkpoint` measured ~35 s/step vs ~86 s/step at defaults (~2.5x). Note `--max-seq-len 1024` truncates long examples — fine for short CTF exchanges, but raise it to 2048 for Fenrir-style long answers. This speed is only practical for small/medium runs (a few thousand examples overnight); for the full dataset or the 30B, run the same script on a cloud NVIDIA GPU.
+
 ### Step 0: Check that Unsloth can see a GPU
 
 ```powershell
