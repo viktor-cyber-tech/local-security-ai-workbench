@@ -81,6 +81,11 @@ It now uses `qwen3-coder:30b`, a mixture-of-experts model: it needs more RAM (~1
 
 The goal is not to make the laptop compete with a desktop GPU. The goal is to accept slower generation in exchange for substantially better command construction, instruction-following, and troubleshooting. For exact transformations, use the command it provides and verify output locally.
 
+## Going further
+
+- **[Training for CTF challenges](docs/TRAINING.md):** few-shot examples in the Modelfile, a knowledge base of your own writeups (RAG), and LoRA fine-tuning with Unsloth.
+- **[Internet access](docs/INTERNET_ACCESS.md):** a terminal agent with Ollama web search (`scripts/aicodex_web.py`), or Open WebUI with self-hosted SearXNG.
+
 ## Safe, effective workflow
 
 1. Tell AICodex the task is an authorized CTF, lab, or owned system.
@@ -111,11 +116,14 @@ flag{final_boss_passed}
 ├── Modelfile                 # Custom AICodex behavior on Qwen3-Coder 30B-A3B
 ├── docs/
 │   ├── SETUP.md
+│   ├── TRAINING.md          # Prompt tuning, RAG, LoRA fine-tuning
+│   ├── INTERNET_ACCESS.md   # Web search options
 │   ├── TROUBLESHOOTING.md
 │   └── VALIDATION.md
 ├── scripts/
 │   ├── setup-aicodex.ps1     # Builds AICodex on Windows PowerShell
 │   ├── setup-aicodex.sh      # Builds AICodex on Kali/Debian/WSL
+│   ├── aicodex_web.py        # AICodex + Ollama web_search/web_fetch
 │   ├── decode_layers.sh
 │   └── decode_layers.ps1
 └── assets/                   # Terminal-style screenshots for the README
@@ -124,6 +132,7 @@ flag{final_boss_passed}
 ## Limits
 
 - A Modelfile changes behavior and response style; it does not train or upgrade the base model.
+- AICodex is offline unless you use one of the [internet access](docs/INTERNET_ACCESS.md) options.
 - A local Ollama chat does not execute commands. Use a separate terminal or an approved agent workflow in a disposable CTF workspace.
 - The model can still make mistakes. Treat generated commands as suggestions and validate them before use.
 

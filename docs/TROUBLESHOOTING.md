@@ -2,7 +2,7 @@
 
 ## The model is slow
 
-- The 14B model fits in 32 GB RAM, but integrated Intel graphics do not provide desktop-class inference speed.
+- `qwen3-coder:30b` needs about 19 GB of RAM. It only activates about 3.3B parameters per token, but integrated Intel graphics still won't match a desktop GPU.
 - Keep the laptop plugged in and use Windows **Best performance** power mode.
 - Ask for concise outputs and commands rather than long tutorials.
 - Start a fresh `ollama run aicodex` session when a conversation becomes long.
