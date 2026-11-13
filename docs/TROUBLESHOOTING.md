@@ -5,7 +5,7 @@
 - `qwen3-coder:30b` needs about 19 GB of RAM. It only activates about 3.3B parameters per token, but integrated Intel graphics still won't match a desktop GPU.
 - Keep the laptop plugged in and use Windows **Best performance** power mode.
 - Ask for concise outputs and commands rather than long tutorials.
-- Start a fresh `ollama run aicodex` session when a conversation becomes long.
+- Start a fresh `ollama run workbench` session when a conversation becomes long.
 
 ## A response stops mid-sentence
 

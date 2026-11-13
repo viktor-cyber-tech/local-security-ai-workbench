@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fine-tune a LoRA for AICodex with Unsloth, then export a GGUF for Ollama.
+"""Fine-tune a LoRA for Workbench with Unsloth, then export a GGUF for Ollama.
 
 Input: data/processed/train.jsonl and test.jsonl from scripts/prepare_dataset.py
 (chat records: {"messages": [{"role": ..., "content": ...}, ...]}).
@@ -9,10 +9,10 @@ Examples (run from the repo root):
   python scripts/train_lora.py --model unsloth/Qwen3-4B-Instruct-2507 --max-steps 10
   python scripts/train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --max-steps 5
 
-  # Rented NVIDIA GPU (24 GB+): the real AICodex base
+  # Rented NVIDIA GPU (24 GB+): the real Workbench base
   python scripts/train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --epochs 1
 
-Outputs (all under --out, default outputs/aicodex-lora, git-ignored):
+Outputs (all under --out, default outputs/workbench-lora, git-ignored):
   lora/   the LoRA adapter (small; keep it, you can re-export later)
   gguf/   merged GGUF for `ollama create` (unless --no-gguf)
 """
@@ -36,7 +36,7 @@ def main():
     ap.add_argument("--model", default="unsloth/Qwen3-4B-Instruct-2507", help="Hugging Face model id to fine-tune")
     ap.add_argument("--train", default="data/processed/train.jsonl")
     ap.add_argument("--test", default="data/processed/test.jsonl")
-    ap.add_argument("--out", default="outputs/aicodex-lora")
+    ap.add_argument("--out", default="outputs/workbench-lora")
     ap.add_argument("--max-seq-len", type=int, default=4096)
     ap.add_argument("--no-4bit", action="store_true", help="plain LoRA on 16-bit weights instead of 4-bit QLoRA (needs ~4x the memory)")
     ap.add_argument("--rank", type=int, default=16, help="LoRA rank")

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build AICodex fine-tuning data (chat JSONL) from local dataset files.
+"""Build Workbench fine-tuning data (chat JSONL) from local dataset files.
 
 Reads .json / .jsonl files (e.g. a local download of a Hugging Face dataset),
-normalizes the common layouts into {"messages": [...]} records with the AICodex
+normalizes the common layouts into {"messages": [...]} records with the Workbench
 system prompt, then filters, de-duplicates, samples, and writes train/test files.
 
 Supported record layouts:
@@ -76,7 +76,7 @@ def normalize(rec):
             content = t.get("value") if "value" in t else t.get("content")
             if role is None or not isinstance(content, str):
                 return None
-            if role != "system":  # replaced by the AICodex system prompt
+            if role != "system":  # replaced by the Workbench system prompt
                 turns.append({"role": role, "content": content.strip()})
     else:
         instr = get_ci(rec, "instruction")

@@ -5,8 +5,8 @@ Sends the user turns from each test record to every model and writes a Markdown
 report with the reference answer next to each model's answer, for manual grading.
 
 Usage:
-  python scripts/eval_models.py --models aicodex aicodex-ft --limit 25
-  python scripts/eval_models.py --test data/processed/test.jsonl --models aicodex --out data/eval-baseline.md
+  python scripts/eval_models.py --models workbench workbench-ft --limit 25
+  python scripts/eval_models.py --test data/processed/test.jsonl --models workbench --out data/eval-baseline.md
 
 Needs: pip install ollama (and the Ollama app running).
 """
@@ -43,7 +43,7 @@ def load_cases(path, limit):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--test", default="data/processed/test.jsonl")
-    ap.add_argument("--models", nargs="+", default=["aicodex", "aicodex-ft"])
+    ap.add_argument("--models", nargs="+", default=["workbench", "workbench-ft"])
     ap.add_argument("--limit", type=int, default=20)
     ap.add_argument("--out", default="data/eval-report.md")
     opts = ap.parse_args()
@@ -54,7 +54,7 @@ def main():
     if not cases:
         sys.exit("No usable test cases found.")
 
-    lines = [f"# AICodex evaluation\n\n", f"Models: {', '.join(opts.models)} — {len(cases)} cases from `{opts.test}`\n\n",
+    lines = [f"# Workbench evaluation\n\n", f"Models: {', '.join(opts.models)} — {len(cases)} cases from `{opts.test}`\n\n",
              "Grade each answer: correct / partly / wrong, and note any made-up flags or commands.\n"]
     timing = {m: 0.0 for m in opts.models}
     for i, (convo, reference) in enumerate(cases, 1):

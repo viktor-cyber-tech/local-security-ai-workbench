@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-model_name="aicodex"
+model_name="workbench"
 install_ollama=false
 run_after=false
 
@@ -43,7 +43,7 @@ fi
 # On a normal Kali system the Ollama service is already running after installation.
 # In minimal shells/containers, start a user-owned server only if one is not reachable.
 if ! ollama list >/dev/null 2>&1; then
-  log_file="${TMPDIR:-/tmp}/aicodex-ollama.log"
+  log_file="${TMPDIR:-/tmp}/workbench-ollama.log"
   printf 'Starting a local Ollama server (log: %s)...\n' "$log_file"
   nohup ollama serve >"$log_file" 2>&1 &
   for _ in {1..20}; do
@@ -71,7 +71,7 @@ ollama pull "$base_model"
 printf "Building local model '%s' from the repository Modelfile...\n" "$model_name"
 ollama create "$model_name" -f "$modelfile"
 
-printf "AICodex is ready. Start it any time with: ollama run %s\n" "$model_name"
+printf "Workbench is ready. Start it any time with: ollama run %s\n" "$model_name"
 
 if [[ "$run_after" == true ]]; then
   ollama run "$model_name"

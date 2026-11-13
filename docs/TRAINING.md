@@ -1,4 +1,4 @@
-# Training AICodex for CTF Challenges
+# Training Workbench for CTF Challenges
 
 "Training" can mean three very different things. Start at Level 1 and only move down when the level above has stopped improving results.
 
@@ -14,7 +14,7 @@ For most CTF work, **Levels 1 and 2 give the biggest gains**. Fine-tuning rarely
 
 ## Step-by-step: from install to a trained model
 
-Run everything in PowerShell from the repo folder (`cd ~\aicodex-local-ctf`). The scripts write to `data/` and `outputs/`, which are git-ignored.
+Run everything in PowerShell from the repo folder (`cd ~\local-security-ai-workbench`). The scripts write to `data/` and `outputs/`, which are git-ignored.
 
 ### Step 0: Check that Unsloth can see a GPU
 
@@ -30,8 +30,8 @@ py -c "import torch; print(torch.__version__, 'cuda', torch.cuda.is_available(),
 ### Step 1: Record a baseline
 
 ```powershell
-ollama create aicodex -f .\Modelfile
-ollama run aicodex
+ollama create workbench -f .\Modelfile
+ollama run workbench
 ```
 
 Run the prompts in [`VALIDATION.md`](VALIDATION.md) and note how it does. Every later step is measured against this.
@@ -57,7 +57,7 @@ Open `data\processed\train.jsonl` and read about 20 random lines. Delete bad dat
 ```powershell
 # Small model: quick check that the whole pipeline works
 py scripts\train_lora.py --model unsloth/Qwen3-4B-Instruct-2507 --max-steps 10
-# The real AICodex base (30B MoE): see if it fits and how long a step takes
+# The real Workbench base (30B MoE): see if it fits and how long a step takes
 py scripts\train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --max-steps 5 --no-gguf
 ```
 
@@ -68,24 +68,24 @@ Notes for the 30B on this laptop:
 - For MoE models, Unsloth downloads the **full 16-bit model (~61 GB)** and converts it to 4-bit while loading. You need that much free disk space, and the RAM spike while loading can run out of memory. If it does, train on a cloud GPU or a smaller dense model.
 - If the timing works out to days, use `--max-steps` with a smaller `--sample` in Step 3, or train on a rented GPU.
 
-**On a rented NVIDIA GPU (24 GB+), for the real AICodex base:** copy the repo and `data\processed\` to the machine, install Unsloth, then:
+**On a rented NVIDIA GPU (24 GB+), for the real Workbench base:** copy the repo and `data\processed\` to the machine, install Unsloth, then:
 
 ```powershell
 python scripts/train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --epochs 1
 ```
 
-Copy `outputs/aicodex-lora/` back to your laptop when it finishes.
+Copy `outputs/workbench-lora/` back to your laptop when it finishes.
 
 Watch the printed loss. It should drop and then level off. If the eval loss starts **rising** while the training loss keeps falling, the model is memorizing. Use fewer steps or epochs.
 
 ### Step 5: Import into Ollama
 
 ```powershell
-Get-ChildItem outputs\aicodex-lora\gguf -Recurse -Filter *.gguf
+Get-ChildItem outputs\workbench-lora\gguf -Recurse -Filter *.gguf
 # Copy the main Modelfile, swapping the FROM line for your GGUF path:
-(Get-Content Modelfile) -replace '^FROM .*', 'FROM ./outputs/aicodex-lora/gguf/YOUR-FILE.gguf' | Set-Content Modelfile.finetuned
-ollama create aicodex-ft -f .\Modelfile.finetuned
-ollama run aicodex-ft
+(Get-Content Modelfile) -replace '^FROM .*', 'FROM ./outputs/workbench-lora/gguf/YOUR-FILE.gguf' | Set-Content Modelfile.finetuned
+ollama create workbench-ft -f .\Modelfile.finetuned
+ollama run workbench-ft
 ```
 
 Ollama reads the chat template from the GGUF. If replies look garbled or never stop, paste the `TEMPLATE` block from `ollama show qwen3-coder:30b --modelfile` (or the matching small base model) into `Modelfile.finetuned` and run `ollama create` again.
@@ -93,15 +93,15 @@ Ollama reads the chat template from the GGUF. If replies look garbled or never s
 ### Step 6: Compare against the baseline
 
 ```powershell
-py scripts\eval_models.py --models aicodex aicodex-ft --limit 25
+py scripts\eval_models.py --models workbench workbench-ft --limit 25
 ```
 
-Open `data\eval-report.md` and grade each answer. Also rerun `VALIDATION.md`. **Keep `aicodex-ft` only if it wins.** Otherwise keep improving your data (Step 2), which helps more than changing settings.
+Open `data\eval-report.md` and grade each answer. Also rerun `VALIDATION.md`. **Keep `workbench-ft` only if it wins.** Otherwise keep improving your data (Step 2), which helps more than changing settings.
 
 ### Before each CTF event
 
 1. Check the event's rules on AI tools and internet use.
-2. `ollama run aicodex` (or `aicodex-ft`) once beforehand, so the model is already loaded and responding.
+2. `ollama run workbench` (or `workbench-ft`) once beforehand, so the model is already loaded and responding.
 3. Turn on web access only if the rules allow it ([`INTERNET_ACCESS.md`](INTERNET_ACCESS.md)).
 4. After the event, write up your solves as new examples (Step 2), then rerun Steps 3–6.
 
@@ -126,7 +126,7 @@ Hex → bytes with `xxd -r -p`, then Base64-decode. Run it and paste the output 
 Add these lines after the `SYSTEM` block, then rebuild:
 
 ```powershell
-ollama create aicodex -f .\Modelfile
+ollama create workbench -f .\Modelfile
 ```
 
 Tips:
@@ -159,7 +159,7 @@ The easiest way is **Open WebUI Knowledge** (see [`INTERNET_ACCESS.md`](INTERNET
 1. Pull an embedding model: `ollama pull nomic-embed-text`
 2. In Open WebUI: **Admin Panel → Settings → Documents**. Set the embedding engine to Ollama and the model to `nomic-embed-text`.
 3. **Workspace → Knowledge → +**. Create a collection such as `ctf-notes` and upload Markdown/PDF/TXT files.
-4. **Workspace → Models → +**. Create a model based on `aicodex` and attach the `ctf-notes` knowledge.
+4. **Workspace → Models → +**. Create a model based on `workbench` and attach the `ctf-notes` knowledge.
 5. In chat, select that model. You can also type `#` to attach a collection to one message.
 
 Good things to load:
@@ -180,7 +180,7 @@ Avoid:
 Fine-tuning needs an **NVIDIA GPU**. Intel integrated graphics and the NPU can't train these models in a practical way. Unsloth reports that its MoE fine-tuning fits Qwen3-30B-A3B in about **17.5 GB of VRAM**. That is more than a free Colab T4 (16 GB), so options are:
 
 - **Fine-tune `qwen3-coder:30b`** on a rented 24 GB+ GPU (an L4/A10/RTX 4090 on Colab Pro, RunPod, Vast.ai, etc.)
-- **Fine-tune a smaller model** (Qwen3 4B–14B class) on free Colab, and use it as a fast specialist next to AICodex
+- **Fine-tune a smaller model** (Qwen3 4B–14B class) on free Colab, and use it as a fast specialist next to Workbench
 
 ### 1. Build a dataset (most of the work)
 
@@ -188,7 +188,7 @@ Use chat-format JSONL, one conversation per line:
 
 ```json
 {"messages": [
-  {"role": "system", "content": "You are AICodex..."},
+  {"role": "system", "content": "You are Workbench..."},
   {"role": "user", "content": "Authorized CTF, Kali. I have capture.pcap and need HTTP POST bodies. One command."},
   {"role": "assistant", "content": "```bash\ntshark -r capture.pcap -Y 'http.request.method == \"POST\"' -T fields -e http.file_data\n```\nFilters POST requests and prints their bodies. Paste the output for the next step."}
 ]}
@@ -210,7 +210,7 @@ Guidelines:
 - **Gated access.** Open the dataset page while signed in to Hugging Face and accept the access conditions first.
 - **It is huge.** The card lists hundreds of files and tens of GB, and the size figures on the card disagree with each other. Don't train on all of it. A few thousand well-chosen examples is plenty for a LoRA, and more mostly costs GPU time.
 - **Quality is unverified.** The card doesn't explain how the records were generated or how they're licensed from the sources it lists. Spot-check a sample before training. Wrong commands in the data teach wrong commands.
-- **It's described as "no restrictions" offensive and defensive content.** Training on it can weaken the authorization rules in the AICodex system prompt. Check the held-out test set for that as well as for accuracy.
+- **It's described as "no restrictions" offensive and defensive content.** Training on it can weaken the authorization rules in the Workbench system prompt. Check the held-out test set for that as well as for accuracy.
 
 **Download only what you need** (PowerShell, from the repo folder; `data/` is git-ignored):
 
@@ -223,7 +223,7 @@ hf download Vyber07/cyber-security --repo-type dataset --local-dir data\raw\cybe
 
 Older `huggingface_hub` versions use `huggingface-cli download` with the same arguments. Adjust `--include` to match the folders or files you picked.
 
-**Convert it to AICodex training data:**
+**Convert it to Workbench training data:**
 
 ```powershell
 py scripts\prepare_dataset.py data\raw\cyber-security --sample 3000 `
@@ -232,7 +232,7 @@ py scripts\prepare_dataset.py data\raw\cyber-security --sample 3000 `
 
 What the script does:
 - Normalizes ShareGPT, chat, Instruction/Input/Output and question/answer records into `{"messages": [...]}`
-- Replaces each record's system prompt with the AICodex one from the `Modelfile`
+- Replaces each record's system prompt with the Workbench one from the `Modelfile`
 - Drops broken JSON, unrecognized layouts, non-alternating conversations, near-empty and very long records, and duplicates
 - Randomly samples `--sample` examples without loading everything into memory (install `ijson` for very large JSON-array files)
 - Mixes in your own verified examples (`--own`), repeated `--own-repeat` times so they outweigh the public data
@@ -257,7 +257,7 @@ Follow Unsloth's official Qwen3 / Qwen3-Coder fine-tuning notebook (docs.unsloth
 Export the merged model as GGUF (Q4_K_M is a good size/quality balance), copy it into this repo folder, and create `Modelfile.finetuned`:
 
 ```text
-FROM ./aicodex-ft-Q4_K_M.gguf
+FROM ./workbench-ft-Q4_K_M.gguf
 # Paste the TEMPLATE block from: ollama show qwen3-coder:30b --modelfile
 TEMPLATE """..."""
 SYSTEM """(same system prompt as Modelfile)"""
@@ -266,12 +266,12 @@ PARAMETER num_ctx 16384
 ```
 
 ```powershell
-ollama create aicodex-ft -f .\Modelfile.finetuned
-ollama run aicodex-ft
+ollama create workbench-ft -f .\Modelfile.finetuned
+ollama run workbench-ft
 ```
 
 `*.gguf` files are large. Don't commit them to Git (they're already listed in `.gitignore`).
 
 ### 4. Prove it's better
 
-Run the held-out test set and `VALIDATION.md` against **both** `aicodex` and `aicodex-ft`. Keep the fine-tune only if it wins. Fine-tunes often get better at the trained style and worse at everything else.
+Run the held-out test set and `VALIDATION.md` against **both** `workbench` and `workbench-ft`. Keep the fine-tune only if it wins. Fine-tunes often get better at the trained style and worse at everything else.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""AICodex with web access.
+"""Workbench with web access.
 
-Runs the local `aicodex` Ollama model and lets it call Ollama's hosted
+Runs the local `workbench` Ollama model and lets it call Ollama's hosted
 web_search / web_fetch tools. The model runs locally; only search queries
 and fetched URLs go through ollama.com.
 
@@ -10,9 +10,9 @@ Requirements:
   OLLAMA_API_KEY environment variable (free key from ollama.com)
 
 Usage:
-  python scripts/aicodex_web.py "your question"
-  python scripts/aicodex_web.py            # interactive mode
-  python scripts/aicodex_web.py --model aicodex-ft --max-steps 8 "question"
+  python scripts/workbench_web.py "your question"
+  python scripts/workbench_web.py            # interactive mode
+  python scripts/workbench_web.py --model workbench-ft --max-steps 8 "question"
 """
 
 import argparse
@@ -32,7 +32,7 @@ WEB_RULES = (
 )
 
 # Passed in the first user turn, not as a system message: an API system message
-# would replace the AICodex SYSTEM prompt baked into the Modelfile.
+# would replace the Workbench SYSTEM prompt baked into the Modelfile.
 TOOLS = {"web_search": web_search, "web_fetch": web_fetch}
 MAX_TOOL_CHARS = 8000  # keep tool results from flooding the context window
 
@@ -67,9 +67,9 @@ def ask(model, messages, max_steps):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="AICodex with web search/fetch")
+    parser = argparse.ArgumentParser(description="Workbench with web search/fetch")
     parser.add_argument("question", nargs="*", help="question to ask (omit for interactive mode)")
-    parser.add_argument("--model", default="aicodex", help="local Ollama model (default: aicodex)")
+    parser.add_argument("--model", default="workbench", help="local Ollama model (default: workbench)")
     parser.add_argument("--max-steps", type=int, default=5, help="max tool-calling rounds per question")
     opts = parser.parse_args()
 
@@ -88,7 +88,7 @@ def main():
         print(ask(opts.model, messages, opts.max_steps))
         return
 
-    print(f"AICodex web mode ({opts.model}). Ctrl+C or 'exit' to quit.")
+    print(f"Workbench web mode ({opts.model}). Ctrl+C or 'exit' to quit.")
     while True:
         try:
             line = input("\n>>> ").strip()

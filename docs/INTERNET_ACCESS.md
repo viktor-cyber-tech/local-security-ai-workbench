@@ -1,10 +1,10 @@
-# Giving AICodex Internet Access
+# Giving Workbench Internet Access
 
-By default AICodex is fully offline: `ollama run aicodex` never touches the network after the model is downloaded. A local model can't browse by itself. Something has to run the search and feed the results back into the chat. There are two ways to do that, and you can use both.
+By default Workbench is fully offline: `ollama run workbench` never touches the network after the model is downloaded. A local model can't browse by itself. Something has to run the search and feed the results back into the chat. There are two ways to do that, and you can use both.
 
 | Option | Search provider | Privacy | Setup |
 | --- | --- | --- | --- |
-| A. `aicodex_web.py` (this repo) | Ollama's hosted web search API | Queries go to ollama.com | 5 minutes, needs a free Ollama account and API key |
+| A. `workbench_web.py` (this repo) | Ollama's hosted web search API | Queries go to ollama.com | 5 minutes, needs a free Ollama account and API key |
 | B. Open WebUI + SearXNG | Your own SearXNG metasearch container | Queries go to search engines through your container, with no account | Docker, about 30 minutes |
 
 > **Rules first.** Some CTFs restrict outside help or AI tools. Check the competition rules before you turn on web access. Never paste live flags or other teams' data into a web-connected tool.
@@ -33,12 +33,12 @@ Ollama provides `web_search` and `web_fetch` APIs that a tool-calling model can 
 4. Ask a question:
 
    ```powershell
-   py scripts\aicodex_web.py "What hashcat mode is used for NetNTLMv2, and what does a sample hash look like?"
+   py scripts\workbench_web.py "What hashcat mode is used for NetNTLMv2, and what does a sample hash look like?"
    ```
 
-   Or start an interactive session with `py scripts\aicodex_web.py`.
+   Or start an interactive session with `py scripts\workbench_web.py`.
 
-The script uses your local `aicodex` model and lets it call `web_search` and `web_fetch` as needed. It prints each search or fetch it performs and ends with source URLs. Useful flags: `--model aicodex-ft` (to use a fine-tuned build), `--max-steps 8` (to allow more tool calls).
+The script uses your local `workbench` model and lets it call `web_search` and `web_fetch` as needed. It prints each search or fetch it performs and ends with source URLs. Useful flags: `--model workbench-ft` (to use a fine-tuned build), `--max-steps 8` (to allow more tool calls).
 
 The model still runs locally. Only the search queries and fetched URLs go through Ollama's service.
 
@@ -58,7 +58,7 @@ docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway `
   ghcr.io/open-webui/open-webui:main
 ```
 
-Open http://localhost:3000 and create the admin account. It should find Ollama at `http://host.docker.internal:11434`, and `aicodex` will appear in the model list.
+Open http://localhost:3000 and create the admin account. It should find Ollama at `http://host.docker.internal:11434`, and `workbench` will appear in the model list.
 
 ### 2. Run SearXNG
 
@@ -90,5 +90,5 @@ Keep both containers bound to `localhost`. Don't expose ports 3000 or 8080 to yo
 ## Safety notes for a web-connected model
 
 - **Prompt injection is real.** A fetched page can contain hidden text like "ignore your instructions". Treat everything the model gets from the web as untrusted, especially in CTF web challenges where the page itself is the challenge.
-- **Read every command before you run it.** AICodex suggests commands. Neither option here runs commands on your machine.
+- **Read every command before you run it.** Workbench suggests commands. Neither option here runs commands on your machine.
 - **Check the sources.** Ask for URLs and open the important ones yourself. Web results reduce made-up answers but don't eliminate them.

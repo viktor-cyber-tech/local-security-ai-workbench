@@ -1,48 +1,48 @@
-# AICodex — Local CTF & Cybersecurity Assistant
+# Local Security AI Workbench — Local CTF & Cybersecurity Assistant
 
 A practical Ollama setup for a local, offline-first cybersecurity assistant built around **Qwen3-Coder 30B-A3B**.
 
 It is designed for authorized CTFs, homelabs, defensive security work, PowerShell/Bash command generation, log analysis, and learning workflows. It is not an autonomous exploitation tool: have it produce a command, run it in your own lab or CTF environment, then verify the result.
 
-> **Performance:** For the best speed and full use of your CPU, memory, and any supported GPU acceleration, run Ollama and AICodex directly on your host operating system—not inside a virtual machine. A Kali VM is still useful as a separate terminal for authorized CTF commands.
+> **Performance:** For the best speed and full use of your CPU, memory, and any supported GPU acceleration, run Ollama and Workbench directly on your host operating system—not inside a virtual machine. A Kali VM is still useful as a separate terminal for authorized CTF commands.
 
 > **Responsible use:** This repository is for lawful, educational, and authorized use only. See [RESPONSIBLE_USE.md](RESPONSIBLE_USE.md) and [LICENSE](LICENSE).
 
-![AICodex pipeline validation](assets/aicodex-pipeline.svg)
+![Workbench pipeline validation](assets/workbench-pipeline.svg)
 
 ## Clone and run the same setup
 
-Install [Ollama](https://ollama.com/download) first, then choose the shell you use. These commands download the base model, build the custom `aicodex` model from this repository’s `Modelfile`, and start it.
+Install [Ollama](https://ollama.com/download) first, then choose the shell you use. These commands download the base model, build the custom `workbench` model from this repository’s `Modelfile`, and start it.
 
 ### Windows PowerShell
 
 ```powershell
-git clone https://github.com/viktor-cyber-tech/aicodex-local-ctf.git
-cd aicodex-local-ctf
-.\scripts\setup-aicodex.ps1 -Run
+git clone https://github.com/viktor-cyber-tech/local-security-ai-workbench.git
+cd local-security-ai-workbench
+.\scripts\setup-workbench.ps1 -Run
 ```
 
 If PowerShell blocks the local script, allow it for only this terminal session and run it again:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\scripts\setup-aicodex.ps1 -Run
+.\scripts\setup-workbench.ps1 -Run
 ```
 
 ### Kali Linux, Debian, or WSL
 
 ```bash
-git clone https://github.com/viktor-cyber-tech/aicodex-local-ctf.git
-cd aicodex-local-ctf
-bash scripts/setup-aicodex.sh --install-ollama --run
+git clone https://github.com/viktor-cyber-tech/local-security-ai-workbench.git
+cd local-security-ai-workbench
+bash scripts/setup-workbench.sh --install-ollama --run
 ```
 
-The first run uses Ollama’s official Linux installer only when Ollama is not already installed. It then pulls the model, creates `aicodex`, and opens the chat.
+The first run uses Ollama’s official Linux installer only when Ollama is not already installed. It then pulls the model, creates `workbench`, and opens the chat.
 
 After setup, the model is available any time with:
 
 ```text
-ollama run aicodex
+ollama run workbench
 ```
 
 ## Manual Ollama CLI
@@ -51,17 +51,17 @@ If Ollama is already installed and you prefer to see each step, run these comman
 
 ```bash
 ollama pull qwen3-coder:30b
-ollama create aicodex -f ./Modelfile
-ollama run aicodex
+ollama create workbench -f ./Modelfile
+ollama run workbench
 ```
 
 The same three commands work in Windows PowerShell; use `.\\Modelfile` instead of `./Modelfile` if preferred.
 
 ## Example prompts
 
-New to local AI or introducing AICodex to a classmate? See [example prompts](docs/EXAMPLE_PROMPTS.md) for copy-paste starting points for exact decoding, layered artifacts, PowerShell 5.1, safe file triage, web-request analysis, defensive logs, and command explanations.
+New to local AI or introducing Workbench to a classmate? See [example prompts](docs/EXAMPLE_PROMPTS.md) for copy-paste starting points for exact decoding, layered artifacts, PowerShell 5.1, safe file triage, web-request analysis, defensive logs, and command explanations.
 
-**Best rule for flags and transformations:** ask AICodex for a command that calculates and prints the answer, run it in your own terminal, then paste the real output back. Do not trust a model to mentally guess a multi-step final flag.
+**Best rule for flags and transformations:** ask Workbench for a command that calculates and prints the answer, run it in your own terminal, then paste the real output back. Do not trust a model to mentally guess a multi-step final flag.
 
 ## Model choice
 
@@ -84,20 +84,20 @@ The goal is not to make the laptop compete with a desktop GPU. The goal is to ac
 ## Going further
 
 - **[Training for CTF challenges](docs/TRAINING.md):** few-shot examples in the Modelfile, a knowledge base of your own writeups (RAG), and LoRA fine-tuning with Unsloth (including the `Vyber07/cyber-security` dataset via `scripts/prepare_dataset.py`).
-- **[Internet access](docs/INTERNET_ACCESS.md):** a terminal agent with Ollama web search (`scripts/aicodex_web.py`), or Open WebUI with self-hosted SearXNG.
+- **[Internet access](docs/INTERNET_ACCESS.md):** a terminal agent with Ollama web search (`scripts/workbench_web.py`), or Open WebUI with self-hosted SearXNG.
 
 ## Safe, effective workflow
 
-1. Tell AICodex the task is an authorized CTF, lab, or owned system.
+1. Tell Workbench the task is an authorized CTF, lab, or owned system.
 2. Ask it for a copyable command in the correct shell.
 3. Run that command in a separate PowerShell, Kali, WSL, or lab terminal.
-4. Feed the actual output back to AICodex for the next step.
+4. Feed the actual output back to Workbench for the next step.
 
 This keeps the model useful without trusting it to silently calculate every flag or execute anything on your host.
 
 ## Example: layered CTF artifact
 
-Given a payload that is hex → gzip → Base64 → ROT13, AICodex produced this valid Kali pipeline:
+Given a payload that is hex → gzip → Base64 → ROT13, Workbench produced this valid Kali pipeline:
 
 ```bash
 echo "1f8b08000000000000034b36ce294df128a94ac9752b4d0db32c8bcc8dca8d30f22b8dca8daa4c8e30b0e5020008b6302721000000" | xxd -r -p | gzip -d | base64 -d | tr 'a-zA-Z' 'n-za-mN-ZA-M'
@@ -113,7 +113,7 @@ flag{final_boss_passed}
 
 ```text
 .
-├── Modelfile                 # Custom AICodex behavior on Qwen3-Coder 30B-A3B
+├── Modelfile                 # Custom Workbench behavior on Qwen3-Coder 30B-A3B
 ├── docs/
 │   ├── SETUP.md
 │   ├── TRAINING.md          # Prompt tuning, RAG, LoRA fine-tuning
@@ -121,9 +121,9 @@ flag{final_boss_passed}
 │   ├── TROUBLESHOOTING.md
 │   └── VALIDATION.md
 ├── scripts/
-│   ├── setup-aicodex.ps1     # Builds AICodex on Windows PowerShell
-│   ├── setup-aicodex.sh      # Builds AICodex on Kali/Debian/WSL
-│   ├── aicodex_web.py        # AICodex + Ollama web_search/web_fetch
+│   ├── setup-workbench.ps1     # Builds Workbench on Windows PowerShell
+│   ├── setup-workbench.sh      # Builds Workbench on Kali/Debian/WSL
+│   ├── workbench_web.py        # Workbench + Ollama web_search/web_fetch
 │   ├── prepare_dataset.py    # Builds fine-tuning JSONL from local datasets
 │   ├── train_lora.py         # Unsloth LoRA fine-tune + GGUF export
 │   ├── eval_models.py        # Side-by-side model comparison report
@@ -135,7 +135,7 @@ flag{final_boss_passed}
 ## Limits
 
 - A Modelfile changes behavior and response style; it does not train or upgrade the base model.
-- AICodex is offline unless you use one of the [internet access](docs/INTERNET_ACCESS.md) options.
+- Workbench is offline unless you use one of the [internet access](docs/INTERNET_ACCESS.md) options.
 - A local Ollama chat does not execute commands. Use a separate terminal or an approved agent workflow in a disposable CTF workspace.
 - The model can still make mistakes. Treat generated commands as suggestions and validate them before use.
 

@@ -1,5 +1,5 @@
 param(
-    [string]$ModelName = 'aicodex',
+    [string]$ModelName = 'workbench',
     [switch]$Run
 )
 
@@ -34,7 +34,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "ollama create failed with exit code $LASTEXITCODE."
 }
 
-Write-Host "AICodex is ready. Start it any time with: ollama run $ModelName"
+Write-Host "Workbench is ready. Start it any time with: ollama run $ModelName"
 
 if ($Run) {
     & ollama run $ModelName

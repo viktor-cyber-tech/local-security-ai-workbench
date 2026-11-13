@@ -4,7 +4,7 @@ Use these as copy-paste starting points for **authorized** CTFs, labs, coursewor
 
 ## Reliable workflow
 
-AICodex is most useful when it generates a command and you run it in your own terminal. For exact flags, hashes, encodings, and file output, tell it **not to guess**—ask for a command that calculates the result.
+Workbench is most useful when it generates a command and you run it in your own terminal. For exact flags, hashes, encodings, and file output, tell it **not to guess**—ask for a command that calculates the result.
 
 1. State the environment: Kali, WSL, Windows PowerShell 5.1, or another shell.
 2. State that the work is an authorized CTF, lab, or owned system.
@@ -118,7 +118,7 @@ Explain this command line by line, including the purpose of every flag and pipe.
 [PASTE COMMAND HERE]
 ```
 
-## 10. Ask AICodex to check its own answer
+## 10. Ask Workbench to check its own answer
 
 ```text
 Before answering, verify that every transformation in your proposed command is necessary and in the correct order. If you are uncertain about a flag or tool behavior, say so instead of inventing it.

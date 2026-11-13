@@ -4,7 +4,7 @@ Run these only in an authorized CTF or lab environment.
 
 ## Test 1: Base64 command generation
 
-Prompt AICodex:
+Prompt Workbench:
 
 ```text
 Authorized offline CTF.

@@ -1,6 +1,6 @@
 # Responsible Use Policy
 
-AICodex is an educational local AI setup for cybersecurity learning, authorized CTFs, homelabs, defensive analysis, and lawful research.
+Workbench is an educational local AI setup for cybersecurity learning, authorized CTFs, homelabs, defensive analysis, and lawful research.
 
 ## Allowed use
 
