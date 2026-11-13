@@ -8,3 +8,4 @@ ollama-models/
 searxng/
 __pycache__/
 data/
+outputs/

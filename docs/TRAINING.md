@@ -12,6 +12,93 @@ For most CTF work, **Levels 1 and 2 give the biggest gains**. Fine-tuning rarely
 
 ---
 
+## Step-by-step: from install to a trained model
+
+Run everything in PowerShell from the repo folder (`cd ~\aicodex-local-ctf`). The scripts write to `data/` and `outputs/`, which are git-ignored.
+
+### Step 0: Check that Unsloth can see a GPU
+
+```powershell
+git pull
+py -m pip install --upgrade ollama datasets trl
+py -c "import torch; print(torch.__version__, 'cuda', torch.cuda.is_available(), 'xpu', torch.xpu.is_available())"
+```
+
+- `xpu True`: Unsloth can train on your Intel Core Ultra graphics. Good for **small models (about 4B) and short runs**.
+- Both `False`: you have the regular (NVIDIA-only) Unsloth build. Follow Unsloth's **Intel GPU install guide** (unsloth.ai/docs → Install → Intel). It needs a fresh Python environment, Intel oneAPI Base Toolkit and `pip install .[intel-gpu-torch290]`. Or skip local training and use a cloud NVIDIA GPU for Step 4.
+
+### Step 1: Record a baseline
+
+```powershell
+ollama create aicodex -f .\Modelfile
+ollama run aicodex
+```
+
+Run the prompts in [`VALIDATION.md`](VALIDATION.md) and note how it does. Every later step is measured against this.
+
+### Step 2: Write your own examples (the most valuable data)
+
+Copy the format of [`examples/own-examples.sample.jsonl`](../examples/own-examples.sample.jsonl) into `data\my-writeups.jsonl`, one conversation per line. Good sources are your NCL, CyberSEED and TryHackMe solves **after** each event ends, using only commands you ran and confirmed. Aim for 50 to start and add more after every event.
+
+### Step 3: Build the training set
+
+```powershell
+py scripts\prepare_dataset.py data\raw\cyber-security --sample 3000 --own data\my-writeups.jsonl --own-repeat 3
+```
+
+(See Level 3 → *Adding a public dataset* for downloading `data\raw\cyber-security`. To train on only your own examples, pass `examples\own-examples.sample.jsonl` or your file as the input instead.)
+
+Open `data\processed\train.jsonl` and read about 20 random lines. Delete bad data now, because it's much harder to fix after training.
+
+### Step 4: Train
+
+**On this laptop** (Intel XPU, small model). Start with a short test run:
+
+```powershell
+py scripts\train_lora.py --model unsloth/Qwen3-4B-Instruct-2507 --no-4bit --max-steps 30
+```
+
+If that finishes, do the full run by dropping `--max-steps` (or use `--epochs 1`). Expect hours, not minutes. Keep it plugged in.
+
+**On a rented NVIDIA GPU (24 GB+), for the real AICodex base:** copy the repo and `data\processed\` to the machine, install Unsloth, then:
+
+```powershell
+python scripts/train_lora.py --model unsloth/Qwen3-Coder-30B-A3B-Instruct --epochs 1
+```
+
+Copy `outputs/aicodex-lora/` back to your laptop when it finishes.
+
+Watch the printed loss. It should drop and then level off. If the eval loss starts **rising** while the training loss keeps falling, the model is memorizing. Use fewer steps or epochs.
+
+### Step 5: Import into Ollama
+
+```powershell
+Get-ChildItem outputs\aicodex-lora\gguf -Recurse -Filter *.gguf
+# Copy the main Modelfile, swapping the FROM line for your GGUF path:
+(Get-Content Modelfile) -replace '^FROM .*', 'FROM ./outputs/aicodex-lora/gguf/YOUR-FILE.gguf' | Set-Content Modelfile.finetuned
+ollama create aicodex-ft -f .\Modelfile.finetuned
+ollama run aicodex-ft
+```
+
+Ollama reads the chat template from the GGUF. If replies look garbled or never stop, paste the `TEMPLATE` block from `ollama show qwen3-coder:30b --modelfile` (or the matching small base model) into `Modelfile.finetuned` and run `ollama create` again.
+
+### Step 6: Compare against the baseline
+
+```powershell
+py scripts\eval_models.py --models aicodex aicodex-ft --limit 25
+```
+
+Open `data\eval-report.md` and grade each answer. Also rerun `VALIDATION.md`. **Keep `aicodex-ft` only if it wins.** Otherwise keep improving your data (Step 2), which helps more than changing settings.
+
+### Before each CTF event
+
+1. Check the event's rules on AI tools and internet use.
+2. `ollama run aicodex` (or `aicodex-ft`) once beforehand, so the model is already loaded and responding.
+3. Turn on web access only if the rules allow it ([`INTERNET_ACCESS.md`](INTERNET_ACCESS.md)).
+4. After the event, write up your solves as new examples (Step 2), then rerun Steps 3–6.
+
+---
+
 ## Level 1: Prompt tuning with the Modelfile
 
 The `Modelfile` already sets the persona and rules. Two more Modelfile features help:

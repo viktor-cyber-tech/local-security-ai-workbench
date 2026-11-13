@@ -125,6 +125,8 @@ flag{final_boss_passed}
 │   ├── setup-aicodex.sh      # Builds AICodex on Kali/Debian/WSL
 │   ├── aicodex_web.py        # AICodex + Ollama web_search/web_fetch
 │   ├── prepare_dataset.py    # Builds fine-tuning JSONL from local datasets
+│   ├── train_lora.py         # Unsloth LoRA fine-tune + GGUF export
+│   ├── eval_models.py        # Side-by-side model comparison report
 │   ├── decode_layers.sh
 │   └── decode_layers.ps1
 └── assets/                   # Terminal-style screenshots for the README
