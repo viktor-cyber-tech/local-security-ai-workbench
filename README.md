@@ -83,6 +83,7 @@ The goal is not to make the laptop compete with a desktop GPU. The goal is to ac
 
 ## Going further
 
+- **[Datasets](docs/DATASETS.md):** permissively-licensed, defensive datasets to fine-tune on, plus which to avoid.
 - **[Training for CTF challenges](docs/TRAINING.md):** few-shot examples in the Modelfile, a knowledge base of your own writeups (RAG), and LoRA fine-tuning with Unsloth (including the `Vyber07/cyber-security` dataset via `scripts/prepare_dataset.py`).
 - **[Agent mode](docs/AGENT.md):** let Workbench read a challenge folder, fetch a target web app, and write recon/enumeration scripts for you to review and run.
 - **[Internet access](docs/INTERNET_ACCESS.md):** a terminal agent with Ollama web search (`scripts/workbench_web.py`), or Open WebUI with self-hosted SearXNG.
