@@ -66,7 +66,9 @@ def main():
             start = time.time()
             try:
                 answer = chat(model=model, messages=convo)["message"]["content"]
-                answer = re.sub(r"\n{3,}", "\n\n", re.sub(r"</?tool_call>", "", answer)).strip()
+                answer = re.sub(r"<think>.*?</think>", "", answer, flags=re.DOTALL)
+                answer = re.sub(r"</?(tool_call|think)>", "", answer)
+                answer = re.sub(r"\n{3,}", "\n\n", answer).strip()
             except Exception as exc:
                 answer = f"(error: {exc})"
             timing[model] += time.time() - start

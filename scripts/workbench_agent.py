@@ -176,11 +176,12 @@ TOOLS_SPEC = [
 
 
 def strip_tool_tags(text):
-    """Qwen3-4B emits stray <tool_call>/</tool_call> tags from its weights. Remove them
-    so the user sees a clean answer; the real command follows the tags."""
+    """Qwen3-4B emits stray <tool_call> and <think> tags from its weights. Remove the
+    thinking blocks and any leftover tags so the user sees a clean answer."""
     if not text:
         return text
-    text = re.sub(r"</?tool_call>", "", text)
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    text = re.sub(r"</?(tool_call|think)>", "", text)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
     return text
 
