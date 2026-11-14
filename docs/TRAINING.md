@@ -52,6 +52,8 @@ Run the prompts in [`VALIDATION.md`](VALIDATION.md) and note how it does. Every 
 
 Copy the format of [`examples/own-examples.sample.jsonl`](../examples/own-examples.sample.jsonl) into `data\my-writeups.jsonl`, one conversation per line. Good sources are your NCL, CyberSEED and TryHackMe solves **after** each event ends, using only commands you ran and confirmed. Aim for 50 to start and add more after every event.
 
+There's also a ready-made, verified set of ~16 command-first examples in [`examples/ctf-seed.jsonl`](../examples/ctf-seed.jsonl) (encoding, hashing, nmap, tshark, log analysis, forensics) — use it directly as `--own` seed data to anchor the command-first style while you build up your own writeups.
+
 ### Step 3: Build the training set
 
 ```powershell
@@ -105,7 +107,7 @@ Ollama reads the chat template from the GGUF. If replies look garbled or never s
 ### Step 6: Compare against the baseline
 
 ```powershell
-py scripts\eval_models.py --models workbench workbench-ft --limit 25
+py scripts\eval_models.py --models workbench workbench-ft --test examples\ctf-eval.jsonl
 ```
 
 Open `data\eval-report.md` and grade each answer. Also rerun `VALIDATION.md`. **Keep `workbench-ft` only if it wins.** Otherwise keep improving your data (Step 2), which helps more than changing settings.

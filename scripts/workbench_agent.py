@@ -175,6 +175,16 @@ TOOLS_SPEC = [
 ]
 
 
+def strip_tool_tags(text):
+    """Qwen3-4B emits stray <tool_call>/</tool_call> tags from its weights. Remove them
+    so the user sees a clean answer; the real command follows the tags."""
+    if not text:
+        return text
+    text = re.sub(r"</?tool_call>", "", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return text
+
+
 def run_turn(model, messages, ws, max_steps):
     dispatch = {
         "list_dir": lambda a: ws.list_dir(a.get("path", ".")),
@@ -189,7 +199,7 @@ def run_turn(model, messages, ws, max_steps):
         messages.append(msg)
         calls = msg.get("tool_calls") or []
         if not calls:
-            return msg.get("content", "")
+            return strip_tool_tags(msg.get("content", ""))
         for call in calls:
             fn = call["function"]["name"]
             args = call["function"].get("arguments") or {}
@@ -206,7 +216,7 @@ def run_turn(model, messages, ws, max_steps):
                 result = f"tool error: {e}"
             messages.append({"role": "tool", "content": result[:MAX_TOOL], "tool_name": fn})
     messages.append({"role": "user", "content": "Stop using tools and give your answer now."})
-    return chat(model=model, messages=messages)["message"].get("content", "")
+    return strip_tool_tags(chat(model=model, messages=messages)["message"].get("content", ""))
 
 
 def main():

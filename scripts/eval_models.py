@@ -13,6 +13,7 @@ Needs: pip install ollama (and the Ollama app running).
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -65,6 +66,7 @@ def main():
             start = time.time()
             try:
                 answer = chat(model=model, messages=convo)["message"]["content"]
+                answer = re.sub(r"\n{3,}", "\n\n", re.sub(r"</?tool_call>", "", answer)).strip()
             except Exception as exc:
                 answer = f"(error: {exc})"
             timing[model] += time.time() - start
